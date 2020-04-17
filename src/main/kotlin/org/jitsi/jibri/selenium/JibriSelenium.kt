@@ -144,6 +144,9 @@ class JibriSelenium(
                 "--disable-infobars",
                 "--autoplay-policy=no-user-gesture-required"
         )
+        /* SLD: accept any cert */
+        chromeOptions.setCapability(CapabilityType.ACCEPT_SSL_CERTS , true)
+        /* ends */
         chromeOptions.setExperimentalOption("w3c", false)
         chromeOptions.addArguments(jibriSeleniumOptions.extraChromeCommandLineFlags)
         val chromeDriverService = ChromeDriverService.Builder().withEnvironment(
