@@ -25,6 +25,9 @@ import org.jxmpp.jid.EntityBareJid
  * When we get a start [JibriIq] message, the room is given to us an [EntityBareJid] that we need to translate
  * into a URL for selenium to join.  This method translates that jid into the url.
  */
+/* ********** SLD: NOTE WELL - we don't use xmppDomain in the end - we hardcode conf.telviva.com ************* */
+/* ********** SLD: NOTE WELL - we don't use xmppDomain in the end - we hardcode conf.telviva.com ************* */
+/* ********** SLD: NOTE WELL - we don't use xmppDomain in the end - we hardcode conf.telviva.com ************* */
 fun getCallUrlInfoFromJid(roomJid: EntityBareJid, stripFromRoomDomain: String, xmppDomain: String): CallUrlInfo {
     try {
         // The call url is constructed from the xmpp domain, an optional subdomain, and a callname like so:
@@ -40,8 +43,8 @@ fun getCallUrlInfoFromJid(roomJid: EntityBareJid, stripFromRoomDomain: String, x
         // Now just grab the call name
         val callName = roomJid.localpart.toString()
         return when {
-            subdomain.isEmpty() -> CallUrlInfo("https://$xmppDomain", callName)
-            else -> CallUrlInfo("https://$xmppDomain/$subdomain", callName)
+            subdomain.isEmpty() -> CallUrlInfo("https://conf.telviva.com", callName)
+            else -> CallUrlInfo("https://conf.telviva.com/$subdomain", callName)
         }
     } catch (e: Exception) {
         throw CallUrlInfoFromJidException(
