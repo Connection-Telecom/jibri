@@ -145,7 +145,9 @@ class JibriSelenium(
                 "--autoplay-policy=no-user-gesture-required"
         )
         /* SLD: accept any cert */
+        logger.info("Steve says: attempt to tell Chrome to accept insecure certs")
         chromeOptions.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true)
+        chromeOptions.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true)
         /* ends */
         chromeOptions.setExperimentalOption("w3c", false)
         chromeOptions.addArguments(jibriSeleniumOptions.extraChromeCommandLineFlags)
