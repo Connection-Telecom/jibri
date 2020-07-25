@@ -1,7 +1,7 @@
 all: build
 
 build:
-	mvn package
+	mvn package -Dmaven.test.skip=true
 
 clean:
 	mvn clean
