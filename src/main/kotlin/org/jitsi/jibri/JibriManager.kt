@@ -220,16 +220,19 @@ class JibriManager(
         currentEnvironmentContext = environmentContext
         if (serviceParams.usageTimeoutMinutes != 0) {
             logger.info("This service will have a usage timeout of ${serviceParams.usageTimeoutMinutes} minute(s)")
-            serviceTimeoutTask = TaskPools.recurringTasksPool.schedule(serviceParams.usageTimeoutMinutes.toLong(), TimeUnit.MINUTES) {
-                logger.info("The usage timeout has elapsed, stopping the currently active service")
-                try {
-                    stopService()
-                } catch (t: Throwable) {
-                    logger.error("Error while stopping service due to usage timeout: $t")
+            serviceTimeoutTask =
+                TaskPools.recurringTasksPool.schedule(serviceParams.usageTimeoutMinutes.toLong(), TimeUnit.MINUTES) {
+                    logger.info("The usage timeout has elapsed, stopping the currently active service")
+                    try {
+                        stopService()
+                    } catch (t: Throwable) {
+                        logger.error("Error while stopping service due to usage timeout: $t")
+                    }
                 }
-            }
         }
-        jibriService.start()
+        TaskPools.ioPool.submit {
+            jibriService.start()
+        }
     }
 
     /**

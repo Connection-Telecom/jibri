@@ -88,7 +88,9 @@ val SIP_GW_URL_OPTIONS = listOf(
     "config.iAmSipGateway=true",
     "config.ignoreStartMuted=true",
     "config.analytics.disabled=true",
-    "config.p2p.enabled=false"
+    "config.p2p.enabled=false",
+    "config.prejoinPageEnabled=false",
+    "config.requireDisplayName=false"
 )
 
 val RECORDING_URL_OPTIONS = listOf(
@@ -98,7 +100,9 @@ val RECORDING_URL_OPTIONS = listOf(
     "config.startWithVideoMuted=true",
     "interfaceConfig.APP_NAME=\"Jibri\"",
     "config.analytics.disabled=true",
-    "config.p2p.enabled=false"
+    "config.p2p.enabled=false",
+    "config.prejoinPageEnabled=false",
+    "config.requireDisplayName=false"
 )
 
 /**
@@ -253,7 +257,8 @@ class JibriSelenium(
                         "callStatsUserName" to "jibri"
                 )
                 xmppCredentials?.let {
-                    localStorageValues["xmpp_username_override"] = "${xmppCredentials.username}@${xmppCredentials.domain}"
+                    localStorageValues["xmpp_username_override"] =
+                        "${xmppCredentials.username}@${xmppCredentials.domain}"
                     localStorageValues["xmpp_password_override"] = xmppCredentials.password
                 }
                 setLocalStorageValues(localStorageValues)
