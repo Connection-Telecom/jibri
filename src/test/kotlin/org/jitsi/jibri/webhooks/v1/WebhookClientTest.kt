@@ -24,6 +24,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockEngineConfig
 import io.ktor.client.engine.mock.MockRequestHandler
@@ -35,10 +36,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.delay
+import org.jitsi.jibri.helpers.within
 import org.jitsi.jibri.status.ComponentBusyStatus
 import org.jitsi.jibri.status.ComponentHealthStatus
 import org.jitsi.jibri.status.JibriStatus
 import org.jitsi.jibri.status.OverallHealth
+import java.time.Duration
 
 class WebhookClientTest : ShouldSpec({
     isolationMode = IsolationMode.InstancePerLeaf
@@ -57,7 +60,7 @@ class WebhookClientTest : ShouldSpec({
             mapOf()
         )
     )
-    val client = WebhookClient("test", MockEngine) {
+    val client = WebhookClient("test", client = HttpClient(MockEngine) {
         engine {
             addHandler { request ->
                 requests += request
@@ -78,38 +81,44 @@ class WebhookClientTest : ShouldSpec({
                 }
             }
         }
-    }
+    })
     context("when the client") {
         context("has a valid subscriber") {
             client.addSubscriber("success")
             context("calling updateStatus") {
                 client.updateStatus(goodStatus)
                 should("send a POST to the subscriber at the proper url") {
-                    requests shouldHaveSize 1
-                    with(requests[0]) {
-                        url.toString() shouldContain "/v1/status"
-                        method shouldBe HttpMethod.Post
+                    within(Duration.ofMillis(2000)) {
+                        requests shouldHaveSize 1
+                        with(requests[0]) {
+                            url.toString() shouldContain "/v1/status"
+                            method shouldBe HttpMethod.Post
+                        }
                     }
                 }
                 should("send the correct data") {
-                    requests[0].body.contentType shouldBe ContentType.Application.Json
-                    requests[0].body.shouldBeInstanceOf<TextContent> {
-                        it.text shouldBe jacksonObjectMapper().writeValueAsString(
-                            JibriEvent.HealthEvent("test", goodStatus)
-                        )
-                        it.text shouldContain """
+                    within(Duration.ofMillis(2000)) {
+                        requests[0].body.contentType shouldBe ContentType.Application.Json
+                        requests[0].body.shouldBeInstanceOf<TextContent> {
+                            it.text shouldBe jacksonObjectMapper().writeValueAsString(
+                                JibriEvent.HealthEvent("test", goodStatus)
+                            )
+                            it.text shouldContain """
                             "jibriId":"test"
                         """.trimIndent()
+                        }
                     }
                 }
                 context("and calling updateStatus again") {
                     client.updateStatus(badStatus)
                     should("send another request with the new status") {
-                        requests shouldHaveSize 2
-                        requests[1].body.shouldBeInstanceOf<TextContent> {
-                            it.text shouldContain jacksonObjectMapper().writeValueAsString(
-                                JibriEvent.HealthEvent("test", badStatus)
-                            )
+                        within(Duration.ofMillis(2000)) {
+                            requests shouldHaveSize 2
+                            requests[1].body.shouldBeInstanceOf<TextContent> {
+                                it.text shouldContain jacksonObjectMapper().writeValueAsString(
+                                    JibriEvent.HealthEvent("test", badStatus)
+                                )
+                            }
                         }
                     }
                 }
@@ -122,19 +131,23 @@ class WebhookClientTest : ShouldSpec({
             context("calling updateStatus") {
                 client.updateStatus(goodStatus)
                 should("send a POST to the subscribers at the proper url") {
-                    requests shouldHaveSize 3
-                    requests shouldContainRequestTo "success"
-                    requests shouldContainRequestTo "delay"
-                    requests shouldContainRequestTo "error"
+                    within(Duration.ofMillis(2000)) {
+                        requests shouldHaveSize 3
+                        requests shouldContainRequestTo "success"
+                        requests shouldContainRequestTo "delay"
+                        requests shouldContainRequestTo "error"
+                    }
                 }
                 context("and calling updateStatus again") {
                     requests.clear()
                     client.updateStatus(goodStatus)
                     should("send a POST to the subscribers at the proper url") {
-                        requests shouldHaveSize 3
-                        requests shouldContainRequestTo "success"
-                        requests shouldContainRequestTo "delay"
-                        requests shouldContainRequestTo "error"
+                        within(Duration.ofMillis(2000)) {
+                            requests shouldHaveSize 3
+                            requests shouldContainRequestTo "success"
+                            requests shouldContainRequestTo "delay"
+                            requests shouldContainRequestTo "error"
+                        }
                     }
                 }
             }
